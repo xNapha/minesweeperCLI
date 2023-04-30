@@ -8,18 +8,42 @@ public class Board<T extends Cell> {
 	private byte countMinesCreated = 0;
 	private byte randomPosX;
 	private byte randomPosY;
+	private boolean mineTriggered = false;
+	private boolean gameWon = false;
+	private NeighbouringCellPosition[] neighbouringCellPositions = new NeighbouringCellPosition[8];
+	
 	// initialise board
 	public Board() {
 		this.fillBoardWithCells();
+		this.fillNeighbouringCellPositionArray();
 		this.fillBoardWithMines();
 	}
+	
+	public void fillNeighbouringCellPositionArray() {
+		neighbouringCellPositions[0] = new NeighbouringCellPosition((byte) -1, (byte) -1);
+		neighbouringCellPositions[1] = new NeighbouringCellPosition((byte) -1, (byte) 0);
+		neighbouringCellPositions[2] = new NeighbouringCellPosition((byte) -1, (byte) 1);
+		neighbouringCellPositions[3] = new NeighbouringCellPosition((byte) 0, (byte) -1);
+		neighbouringCellPositions[4] = new NeighbouringCellPosition((byte) 0, (byte) 1);
+		neighbouringCellPositions[5] = new NeighbouringCellPosition((byte) 1, (byte) -1);
+		neighbouringCellPositions[6] = new NeighbouringCellPosition((byte) 1, (byte) 0);
+		neighbouringCellPositions[7] = new NeighbouringCellPosition((byte) 1, (byte) 1);
+	};
 	
 	public void fillBoardWithCells() {
 		for(byte i = 0; i < 10; i++) {
 			for(byte j = 0; j < 10; j++) {
-				
 				Cell field = new Cell(i,j, isMine);
 				gameBoard[i][j] = field;
+			}
+		}
+	}
+	
+	public void increaseNeighbouringCellValue(byte posX, byte posY) {
+		for(byte i = 0; i < neighbouringCellPositions.length ; i++) {
+			try {
+				this.gameBoard[posX + this.neighbouringCellPositions[i].getPosX()][posY + this.neighbouringCellPositions[i].getPosY()].increaseNextToMine();
+			} catch (Exception error) {
 			}
 		}
 	}
@@ -30,6 +54,7 @@ public class Board<T extends Cell> {
 			Cell currentCell = this.gameBoard[randomPosX][randomPosY];
 			if(!currentCell.checkIfMine()) {
 				currentCell.setMine();
+				this.increaseNeighbouringCellValue(randomPosX, randomPosY);
 				this.countMinesCreated += 1;
 			}
 		}
@@ -50,5 +75,18 @@ public class Board<T extends Cell> {
 			}
 			System.out.println(" ");
 		}
+	}
+	
+	public void enterCellPos(byte posX, byte posY) {
+		Cell currentCell = this.gameBoard[posX][posY];
+		currentCell.triggerCell();
+		this.mineTriggered = true;
+	}
+	
+	public boolean getMineTriggered() {
+		return this.mineTriggered;
+	}
+	public boolean getGameWon() {
+		return this.gameWon;
 	}
 }

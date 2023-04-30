@@ -5,6 +5,7 @@ public class Cell implements Mine{
 	byte positionY;
 	boolean isMine = false;
 	byte nextToMine = 0;
+	boolean revealCell = false;
 	public Cell(byte i, byte j, boolean isMine) {
 		this.positionX = i;
 		this.positionY = j;
@@ -25,7 +26,15 @@ public class Cell implements Mine{
 	}
 	
 	public String displayPiece() {
-		return (this.isMine) ? "X" : "O";
+//		return (this.isMine) ? "X" : "O";
+//		return (this.revealCell) ? " X" : " " + this.nextToMine;
+		if(this.revealCell && this.isMine) {
+			return "|X";
+		}else if(this.revealCell && !this.isMine){
+			return "|"+this.nextToMine;
+		}else {
+			return "|_";
+		}
 	}
 
 	@Override
@@ -36,5 +45,9 @@ public class Cell implements Mine{
 	
 	public void increaseNextToMine() {
 		this.nextToMine += 1;
+	}
+	
+	public void triggerCell() {
+		this.revealCell = true;
 	}
 }
