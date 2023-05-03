@@ -1,92 +1,107 @@
 package minesweeper;
-import java.util.Arrays;
 
 public class Board<T extends Cell> {
-	public Cell[][] gameBoard = new Cell[10][10];
-	private byte maxMines = 10;
-	private boolean isMine;
-	private byte countMinesCreated = 0;
-	private byte randomPosX;
-	private byte randomPosY;
+	private int boardSize;
+	public Cell[][] gameBoard;
+	private int maxMines;
+	private int countMinesCreated = 0;
+	private int randomPosX;
+	private int randomPosY;
 	private boolean mineTriggered = false;
 	private boolean gameWon = false;
 	private NeighbouringCellPosition[] neighbouringCellPositions = new NeighbouringCellPosition[8];
-	
+
 	// initialise board
 	public Board() {
+		this.boardSize = 10;
+		this.maxMines = 10;
+		this.gameBoard = new Cell[this.boardSize][this.boardSize];
+		this.createBoard();
+	}
+
+	public Board(int boardSize, int maxMines) {
+		this.boardSize = boardSize;
+		this.maxMines = maxMines;
+		this.gameBoard = new Cell[this.boardSize][this.boardSize];
+		this.createBoard();
+	}
+
+	public void createBoard() {
+		NeighbouringCellPosition.fillNeighbouringCellPositionArray(neighbouringCellPositions);
 		this.fillBoardWithCells();
-		this.fillNeighbouringCellPositionArray();
 		this.fillBoardWithMines();
 	}
-	
-	public void fillNeighbouringCellPositionArray() {
-		neighbouringCellPositions[0] = new NeighbouringCellPosition((byte) -1, (byte) -1);
-		neighbouringCellPositions[1] = new NeighbouringCellPosition((byte) -1, (byte) 0);
-		neighbouringCellPositions[2] = new NeighbouringCellPosition((byte) -1, (byte) 1);
-		neighbouringCellPositions[3] = new NeighbouringCellPosition((byte) 0, (byte) -1);
-		neighbouringCellPositions[4] = new NeighbouringCellPosition((byte) 0, (byte) 1);
-		neighbouringCellPositions[5] = new NeighbouringCellPosition((byte) 1, (byte) -1);
-		neighbouringCellPositions[6] = new NeighbouringCellPosition((byte) 1, (byte) 0);
-		neighbouringCellPositions[7] = new NeighbouringCellPosition((byte) 1, (byte) 1);
-	};
-	
+
 	public void fillBoardWithCells() {
-		for(byte i = 0; i < 10; i++) {
-			for(byte j = 0; j < 10; j++) {
-				Cell field = new Cell(i,j, isMine);
-				gameBoard[i][j] = field;
+		for (int i = 0; i < this.boardSize; i++) {
+			for (int j = 0; j < this.boardSize; j++) {
+				Cell currentPos = this.gameBoard[i][j];
+				if (currentPos == null) {
+					Cell field = new Cell(i, j);
+					this.gameBoard[i][j] = field;
+				}
 			}
 		}
 	}
-	
-	public void increaseNeighbouringCellValue(byte posX, byte posY) {
-		for(byte i = 0; i < neighbouringCellPositions.length ; i++) {
+
+	public void increaseNeighbouringCellValue(int posX, int posY) {
+		for (int i = 0; i < neighbouringCellPositions.length; i++) {
 			try {
-				this.gameBoard[posX + this.neighbouringCellPositions[i].getPosX()][posY + this.neighbouringCellPositions[i].getPosY()].increaseNextToMine();
+				this.gameBoard[posX + this.neighbouringCellPositions[i].getPosX()][posY
+						+ this.neighbouringCellPositions[i].getPosY()].increaseNextToMine();
 			} catch (Exception error) {
 			}
 		}
 	}
-	
+
 	public void fillBoardWithMines() {
-		while(countMinesCreated < this.maxMines) {
+		while (countMinesCreated < this.maxMines) {
 			this.getRandomCell();
-			Cell currentCell = this.gameBoard[randomPosX][randomPosY];
-			if(!currentCell.checkIfMine()) {
-				currentCell.setMine();
+			Cell currentPos = this.gameBoard[randomPosX][randomPosY];
+			if (!currentPos.checkIfMine()) {
+				Mine currentMine = new Mine(randomPosX, randomPosY);
+				this.gameBoard[randomPosX][randomPosY] = currentMine;
 				this.increaseNeighbouringCellValue(randomPosX, randomPosY);
-				this.countMinesCreated += 1;
+				countMinesCreated += 1;
 			}
+
 		}
 	}
-	
+
 	// generate a random number to see if the cell has a mine in it or not
 	public void getRandomCell() {
-		randomPosX = (byte) Math.round((Math.random() * 9));
-		randomPosY = (byte) Math.round((Math.random() * 9));
+		randomPosX = (int) Math.round((Math.random() * (this.boardSize - 1)));
+		randomPosY = (int) Math.round((Math.random() * (this.boardSize - 1)));
 		// if number is 1 return true else return false
 	}
-	
+
 	// log the board to the console
 	public void getBoard() {
-		for(byte i =0; i < 10; i++) {
-			for(byte j = 0; j <10; j++) {
+		for (int i = 0; i < this.boardSize; i++) {
+			for (int j = 0; j < this.boardSize; j++) {
 				System.out.print(gameBoard[i][j].displayPiece());
 			}
 			System.out.println(" ");
 		}
 	}
-	
-	public void enterCellPos(byte posX, byte posY) {
+
+	public void enterCellPos(int posX, int posY) {
 		Cell currentCell = this.gameBoard[posX][posY];
-		currentCell.triggerCell();
-		this.mineTriggered = true;
+		currentCell.setRevealCell();
+		if (currentCell instanceof Mine && currentCell.getRevealCell()) {
+			this.mineTriggered = true;
+		}
 	}
-	
+
 	public boolean getMineTriggered() {
 		return this.mineTriggered;
 	}
+
 	public boolean getGameWon() {
 		return this.gameWon;
+	}
+
+	public int getBoardSize() {
+		return this.boardSize;
 	}
 }
