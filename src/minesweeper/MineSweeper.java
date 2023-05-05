@@ -36,7 +36,7 @@ public class MineSweeper {
 		} else if (!matchFound) {
 			matchFound = false;
 			System.out.format(
-					"%s was not valid, please enter a number between 5-70 or leave it blank to create a 10x10 board.\n",
+					"%s was not valid, please enter a number between 5-30 or leave it blank to create a 10x10 board.\n",
 					boardSize);
 		} else if (Integer.parseInt(boardSize) > 30) {
 			matchFound = false;
@@ -53,6 +53,7 @@ public class MineSweeper {
 		if (command.equals("e")) {
 			this.exitGame = true;
 		}
+		userInput.close();
 	}
 
 	private void createBoard() {
@@ -65,21 +66,25 @@ public class MineSweeper {
 
 	private int exponentialMines(int boardSize) {
 		int mines = boardSize;
+//		for testing purposes only
+//		if (boardSize == 5)
+//			mines = 1;
+
 		if (boardSize > 10)
-			mines += (boardSize); // 100 mines | 400 cells
+			mines += (boardSize); // 10 mines | 100 cells
 		if (boardSize >= 20)
-			mines += (boardSize); // 100 mines | 400 cells
+			mines += (boardSize * 3); // 100 mines | 400 cells
 		if (boardSize == 30)
-			mines += (boardSize); // 240 mines | 900 cells
-		System.out.println(mines);
+			mines += (boardSize * 4); // 270 mines | 900 cells
+
 		return mines;
 	}
 
 	private void gameInProgress(int boardSize, int mines) {
 		Board startBoard = new Board(boardSize, mines);
 		System.out.format("%s games won : %s games lost\n", gamesWon, gamesLost);
-		while (!startBoard.getMineTriggered() && !startBoard.getGameWon()) {
-			startBoard.getBoard();
+		startBoard.getBoard();
+		while (!startBoard.getEndCurrentGame()) {
 			System.out.println("Enter Pos X and Pos Y (eg. 2:4)");
 			String positions = userInput.nextLine();
 			regEx = "(\\d+:\\d+)";
@@ -94,13 +99,13 @@ public class MineSweeper {
 				int posY = Integer.parseInt(positionsArr[0]) - 1;
 				startBoard.enterCellPos(posX, posY);
 			}
+			startBoard.getBoard();
 		}
-		startBoard.getBoard();
 		if (startBoard.getMineTriggered()) {
 			this.gamesLost += 1;
-			System.out.println("BOOM!! \nYou lost");
+			System.out.println("BOOM!!\nYou lost");
 		} else if (startBoard.getGameWon()) {
-			System.out.println("You won");
+			System.out.println("You successfully avoided all the mines!!\nYou Won!");
 			this.gamesWon += 1;
 		}
 	}

@@ -20,11 +20,12 @@ public class Cell {
 		return this.isMine;
 	}
 
-	public String displayPiece() {
-//		return (this.isMine) ? "X" : "O";
+	public String displayPiece(boolean mineTriggered) {
+//		return (this.isMine) ? "|X" : "|0";
 //		return (this.revealCell) ? " X" : " " + this.nextToMine;
-//		return (this.isMine) ? " X" : " " + this.nextToMine;
-		if (this.revealCell && this.isMine) {
+		if (mineTriggered && this.isMine) {
+			return "|X";
+		} else if (this.revealCell && this.isMine) {
 			return "|X";
 		} else if (this.revealCell && !this.isMine) {
 			return "|" + this.nextToMine;

@@ -10,6 +10,7 @@ public class Board<T extends Cell> {
 	private int cellCounter;
 	private boolean mineTriggered = false;
 	private boolean gameWon = false;
+	private boolean endCurrentGame = false;
 	private NeighbouringCellPosition[] neighbouringCellPositions = new NeighbouringCellPosition[8];
 
 	public Board() {
@@ -48,24 +49,37 @@ public class Board<T extends Cell> {
 
 	public void increaseNeighbouringCellValue(int posX, int posY) {
 		for (int i = 0; i < neighbouringCellPositions.length; i++) {
-			int newPosX = posX + this.neighbouringCellPositions[i].getPosX();
-			int newPosY = posY + this.neighbouringCellPositions[i].getPosY();
-			if (newPosX >= 0 && newPosX < this.boardSize && newPosY >= 0 && newPosY < this.boardSize) {
+			int newPosX = getNewPos(posX, this.neighbouringCellPositions[i].getPosX());
+			int newPosY = getNewPos(posY, this.neighbouringCellPositions[i].getPosY());
+			if (isOutOfBounds(newPosX, newPosY, boardSize)) {
 				this.gameBoard[newPosX][newPosY].increaseNextToMine();
 			}
 		}
 	}
 
+	public int getNewPos(int position, int positionAdjustment) {
+		return position + positionAdjustment;
+
+	}
+
+	public boolean isOutOfBounds(int newPosX, int newPosY, int boardSize) {
+		return (newPosX >= 0 && newPosX < boardSize && newPosY >= 0 && newPosY < boardSize);
+	}
+
 	public void fillBoardWithMines() {
 		while (countMinesCreated < this.maxMines) {
 			this.getRandomCell();
-			Cell currentPos = this.gameBoard[randomPosX][randomPosY];
-			if (!currentPos.getIsMine()) {
-				Mine currentMine = new Mine(randomPosX, randomPosY);
-				this.gameBoard[randomPosX][randomPosY] = currentMine;
-				this.increaseNeighbouringCellValue(randomPosX, randomPosY);
-				countMinesCreated += 1;
-			}
+			this.plantMineOnBoard();
+		}
+	}
+
+	public void plantMineOnBoard() {
+		Cell currentPos = this.gameBoard[randomPosX][randomPosY];
+		if (!currentPos.getIsMine()) {
+			Mine currentMine = new Mine(randomPosX, randomPosY);
+			this.gameBoard[randomPosX][randomPosY] = currentMine;
+			this.increaseNeighbouringCellValue(randomPosX, randomPosY);
+			countMinesCreated += 1;
 		}
 	}
 
@@ -76,7 +90,39 @@ public class Board<T extends Cell> {
 
 	public void getBoard() {
 		this.refreshCellCounter();
-		System.out.print("  ");
+		this.printHorizontalAxis();
+		for (int x = 0; x < this.boardSize; x++) {
+			this.printVerticalAxis(x);
+			for (int y = 0; y < this.boardSize; y++) {
+				Cell currentCell = gameBoard[x][y];
+				this.printCurrentCell(currentCell);
+				this.setCellCounter(currentCell);
+			}
+			System.out.println("|");
+		}
+		this.checkIfGameWon();
+	}
+
+	public void printCurrentCell(Cell currentCell) {
+		if (this.mineTriggered) {
+			System.out.print(currentCell.displayPiece(this.mineTriggered));
+		} else {
+			System.out.print(currentCell.displayPiece(this.mineTriggered));
+		}
+	}
+
+	public void printVerticalAxis(int x) {
+		if (x < 9) {
+			System.out.print("0" + (x + 1));
+		} else {
+			System.out.print(x + 1);
+		}
+	}
+
+	public void printHorizontalAxis() {
+		String axisGap = "  ";
+		String endofAxis = "|\n";
+		System.out.print(axisGap);
 		for (int i = 0; i < this.boardSize; i++) {
 			if ((i + 1) % 10 == 0) {
 				System.out.format("|%s", (i + 1) / 10);
@@ -84,28 +130,19 @@ public class Board<T extends Cell> {
 				System.out.format("|%s", (i + 1) % 10);
 			}
 		}
-		System.out.print("|\n");
-		for (int x = 0; x < this.boardSize; x++) {
-			if (x < 9) {
-				System.out.print("0" + (x + 1));
-			} else {
-				System.out.print(x + 1);
-			}
-			for (int y = 0; y < this.boardSize; y++) {
-				Cell currentCell = gameBoard[x][y];
-				System.out.print(currentCell.displayPiece());
-				if (!currentCell.getIsMine() && currentCell.getRevealCell()) {
-					this.cellCounter -= 1;
-				}
-			}
-			System.out.println("|");
+		System.out.print(endofAxis);
+	}
+
+	public void setCellCounter(Cell currentCell) {
+		if (!currentCell.getIsMine() && currentCell.getRevealCell()) {
+			this.cellCounter -= 1;
 		}
-		this.checkIfGameWon();
 	}
 
 	public void checkIfGameWon() {
 		if (this.cellCounter <= 0) {
-			this.gameWon = true;
+			setGameWon(true);
+			setEndCurrentGame(true);
 		}
 	}
 
@@ -117,7 +154,8 @@ public class Board<T extends Cell> {
 		Cell currentCell = this.gameBoard[posX][posY];
 		currentCell.setRevealCell();
 		if (currentCell instanceof Mine) {
-			this.mineTriggered = true;
+			setMineTriggered(true);
+			setEndCurrentGame(true);
 		} else if (!currentCell.getIsMine() && currentCell.getNextToMine() == 0) {
 			this.cascadeEffect(posX, posY);
 		}
@@ -127,12 +165,28 @@ public class Board<T extends Cell> {
 		return this.mineTriggered;
 	}
 
+	public void setMineTriggered(boolean state) {
+		this.mineTriggered = state;
+	}
+
 	public boolean getGameWon() {
 		return this.gameWon;
 	}
 
+	public void setGameWon(boolean state) {
+		this.gameWon = state;
+	}
+
 	public int getBoardSize() {
 		return this.boardSize;
+	}
+
+	public boolean getEndCurrentGame() {
+		return this.endCurrentGame;
+	}
+
+	public void setEndCurrentGame(boolean state) {
+		this.endCurrentGame = state;
 	}
 
 	public void cascadeEffect(int posX, int posY) {
@@ -141,14 +195,12 @@ public class Board<T extends Cell> {
 			return;
 		} else {
 			for (int i = 0; i < neighbouringCellPositions.length; i++) {
-				int newPosX = posX + this.neighbouringCellPositions[i].getPosX();
-				int newPosY = posY + this.neighbouringCellPositions[i].getPosY();
-				boolean newPosWithinBounds = (newPosX >= 0 && newPosX < this.boardSize && newPosY >= 0
-						&& newPosY < this.boardSize);
-				if (newPosWithinBounds && !this.gameBoard[newPosX][newPosY].getRevealCell()) {
+				int newPosX = getNewPos(posX, this.neighbouringCellPositions[i].getPosX());
+				int newPosY = getNewPos(posY, this.neighbouringCellPositions[i].getPosY());
+				if (isOutOfBounds(newPosX, newPosY, boardSize) && !this.gameBoard[newPosX][newPosY].getRevealCell()) {
 					enterCellPos(newPosX, newPosY);
 				}
-				if (newPosWithinBounds) {
+				if (isOutOfBounds(newPosX, newPosY, boardSize)) {
 					this.gameBoard[newPosX][newPosY].setRevealCell();
 				}
 			}
