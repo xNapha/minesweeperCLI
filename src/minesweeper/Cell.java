@@ -7,17 +7,17 @@ public class Cell {
 	int nextToMine = 0;
 	boolean revealCell = false;
 
-	public Cell(int i, int j) {
-		this.positionX = i;
-		this.positionY = j;
+	public Cell(int x, int y) {
+		this.positionX = x;
+		this.positionY = y;
 	}
 
 	public void getPosition() {
 		System.out.printf("X:%s, Y:%s | ", this.positionX, this.positionY);
 	}
 
-	public boolean checkIfMine() {
-		return (this.isMine) ? true : false;
+	public boolean getIsMine() {
+		return this.isMine;
 	}
 
 	public String displayPiece() {
@@ -43,5 +43,9 @@ public class Cell {
 
 	public boolean getRevealCell() {
 		return this.revealCell;
+	}
+
+	public int getNextToMine() {
+		return this.nextToMine;
 	}
 }

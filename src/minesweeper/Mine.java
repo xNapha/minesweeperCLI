@@ -6,9 +6,4 @@ public class Mine extends Cell {
 		this.isMine = true;
 		// TODO Auto-generated constructor stub
 	}
-
-	public void triggerCell() {
-
-		this.revealCell = true;
-	}
 }
