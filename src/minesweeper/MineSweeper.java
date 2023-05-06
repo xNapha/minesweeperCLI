@@ -5,9 +5,11 @@ import java.util.Scanner;
 public class MineSweeper {
 	private Scanner userInput = new Scanner(System.in);
 	private String boardSize;
-	private String regEx;
+	private String boardCreationRegEx = "\\d+";
+	private String gameInProgressRegEx = "(\\d+:\\d+)";
 	private String boardSizeQuestion = "What board size do you want? (Eg. 20 creates a 20x20 board, leaving it blank creates a 10x10 board, Min 5, Max. 30): ";
 	private String invalidInput = "Invalid input";
+	private String noValidNumberError = "%s was not valid, please enter a number between 5-30 or leave it blank to create a 10x10 board.\n";
 	private String minimumBoardSizeError = "Smaller than allowed minimum board size.";
 	private String maximumBoardSizeError = "Greater than allowed maximum board size.";
 	private boolean matchFound = false;
@@ -15,7 +17,11 @@ public class MineSweeper {
 	private int gamesWon = 0;
 	private int gamesLost = 0;
 
-	public void startGame() {
+	public MineSweeper() {
+		this.startGame();
+	}
+
+	private void startGame() {
 		while (!exitGame) {
 			this.userInputBoardSize();
 			while (!matchFound) {
@@ -29,22 +35,22 @@ public class MineSweeper {
 	private void userInputBoardSize() {
 		System.out.println(boardSizeQuestion);
 		boardSize = userInput.nextLine();
-		String regEx = "\\d+";
-		matchFound = boardSize.matches(regEx);
-		if (boardSize.equals("")) {
+		matchFound = boardSize.matches(boardCreationRegEx);
+		if (boardSize == "") {
+			System.out.println("test");
 			matchFound = true;
 		} else if (!matchFound) {
-			matchFound = false;
-			System.out.format(
-					"%s was not valid, please enter a number between 5-30 or leave it blank to create a 10x10 board.\n",
-					boardSize);
+			System.out.format(noValidNumberError, boardSize);
 		} else if (Integer.parseInt(boardSize) > 30) {
-			matchFound = false;
-			System.out.format("%s. %s\n", invalidInput, maximumBoardSizeError);
+			boardSizeError(maximumBoardSizeError);
 		} else if (Integer.parseInt(boardSize) < 5) {
-			matchFound = false;
-			System.out.format("%s. %s\n", invalidInput, minimumBoardSizeError);
+			boardSizeError(minimumBoardSizeError);
 		}
+	}
+
+	private void boardSizeError(String boardSizeError) {
+		matchFound = false;
+		System.out.format("%s. %s\n", invalidInput, boardSizeError);
 	}
 
 	private void exitOrRestart() {
@@ -60,11 +66,11 @@ public class MineSweeper {
 		if (boardSize.equals("")) {
 			this.gameInProgress(10, 10);
 		} else {
-			this.gameInProgress(Integer.parseInt(boardSize), exponentialMines(Integer.parseInt(boardSize)));
+			this.gameInProgress(Integer.parseInt(boardSize), createMines(Integer.parseInt(boardSize)));
 		}
 	}
 
-	private int exponentialMines(int boardSize) {
+	public int createMines(int boardSize) {
 		int mines = boardSize;
 //		for testing purposes only
 //		if (boardSize == 5)
@@ -87,20 +93,31 @@ public class MineSweeper {
 		while (!startBoard.getEndCurrentGame()) {
 			System.out.println("Enter Pos X and Pos Y (eg. 2:4)");
 			String positions = userInput.nextLine();
-			regEx = "(\\d+:\\d+)";
-			boolean matchFound = positions.matches(regEx);
+			matchFound = positions.matches(gameInProgressRegEx);
+
 			String[] positionsArr = positions.split(":");
-			if (!matchFound || Integer.parseInt(positionsArr[0]) > startBoard.getBoardSize()
-					|| Integer.parseInt(positionsArr[1]) > startBoard.getBoardSize()
-					|| Integer.parseInt(positionsArr[0]) == 0 || Integer.parseInt(positionsArr[1]) == 0) {
-				System.out.println("Invalid Input");
-			} else {
-				int posX = Integer.parseInt(positionsArr[1]) - 1;
-				int posY = Integer.parseInt(positionsArr[0]) - 1;
-				startBoard.enterCellPos(posX, posY);
-			}
+
+			this.checkIfValidInput(startBoard, positionsArr);
 			startBoard.getBoard();
 		}
+		this.postGameText(startBoard);
+	}
+
+	private void checkIfValidInput(Board startBoard, String[] positionsArr) {
+		int positionArr0 = Integer.parseInt(positionsArr[0]);
+		int positionArr1 = Integer.parseInt(positionsArr[1]);
+
+		if (!matchFound || positionArr0 > startBoard.getBoardSize() || positionArr1 > startBoard.getBoardSize()
+				|| positionArr0 <= 0 || positionArr1 <= 0) {
+			System.out.println("Invalid Input");
+		} else {
+			int posX = positionArr1 - 1;
+			int posY = positionArr0 - 1;
+			startBoard.enterCellPos(posX, posY);
+		}
+	}
+
+	private void postGameText(Board startBoard) {
 		if (startBoard.getMineTriggered()) {
 			this.gamesLost += 1;
 			System.out.println("BOOM!!\nYou lost");

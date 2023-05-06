@@ -49,4 +49,12 @@ public class Cell {
 	public int getNextToMine() {
 		return this.nextToMine;
 	}
+
+	public int getPositionX() {
+		return this.positionX;
+	}
+
+	public int getPositionY() {
+		return this.positionY;
+	}
 }

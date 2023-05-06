@@ -161,6 +161,25 @@ public class Board<T extends Cell> {
 		}
 	}
 
+	public void cascadeEffect(int posX, int posY) {
+		boolean posOutOfBounds = posX < 0 || posX > this.boardSize || posY < 0 || posY > this.boardSize;
+		if (posOutOfBounds) {
+			return;
+		} else {
+			for (int i = 0; i < neighbouringCellPositions.length; i++) {
+				int newPosX = getNewPos(posX, this.neighbouringCellPositions[i].getPosX());
+				int newPosY = getNewPos(posY, this.neighbouringCellPositions[i].getPosY());
+				if (isOutOfBounds(newPosX, newPosY, boardSize) && !this.gameBoard[newPosX][newPosY].getRevealCell()) {
+					enterCellPos(newPosX, newPosY);
+				}
+				if (isOutOfBounds(newPosX, newPosY, boardSize)) {
+					this.gameBoard[newPosX][newPosY].setRevealCell();
+				}
+			}
+		}
+
+	}
+
 	public boolean getMineTriggered() {
 		return this.mineTriggered;
 	}
@@ -189,23 +208,23 @@ public class Board<T extends Cell> {
 		this.endCurrentGame = state;
 	}
 
-	public void cascadeEffect(int posX, int posY) {
-		boolean posOutOfBounds = posX < 0 || posX > this.boardSize || posY < 0 || posY > this.boardSize;
-		if (posOutOfBounds) {
-			return;
-		} else {
-			for (int i = 0; i < neighbouringCellPositions.length; i++) {
-				int newPosX = getNewPos(posX, this.neighbouringCellPositions[i].getPosX());
-				int newPosY = getNewPos(posY, this.neighbouringCellPositions[i].getPosY());
-				if (isOutOfBounds(newPosX, newPosY, boardSize) && !this.gameBoard[newPosX][newPosY].getRevealCell()) {
-					enterCellPos(newPosX, newPosY);
-				}
-				if (isOutOfBounds(newPosX, newPosY, boardSize)) {
-					this.gameBoard[newPosX][newPosY].setRevealCell();
-				}
-			}
-		}
-
+	public int getMaxMines() {
+		return this.maxMines;
 	}
 
+	public Cell[][] getGameBoard() {
+		return this.gameBoard;
+	}
+
+	public int getRandomPosX() {
+		return this.randomPosX;
+	}
+
+	public int getRandomPosY() {
+		return this.randomPosY;
+	}
+
+	public int getCellCounter() {
+		return this.cellCounter;
+	}
 }
