@@ -58,8 +58,8 @@ public class MineSweeper {
 		String command = userInput.nextLine().toLowerCase();
 		if (command.equals("e")) {
 			this.exitGame = true;
+			userInput.close();
 		}
-		userInput.close();
 	}
 
 	private void createBoard() {
@@ -104,13 +104,14 @@ public class MineSweeper {
 	}
 
 	private void checkIfValidInput(Board startBoard, String[] positionsArr) {
-		int positionArr0 = Integer.parseInt(positionsArr[0]);
-		int positionArr1 = Integer.parseInt(positionsArr[1]);
 
-		if (!matchFound || positionArr0 > startBoard.getBoardSize() || positionArr1 > startBoard.getBoardSize()
-				|| positionArr0 <= 0 || positionArr1 <= 0) {
+		if (!matchFound || Integer.parseInt(positionsArr[0]) > startBoard.getBoardSize()
+				|| Integer.parseInt(positionsArr[1]) > startBoard.getBoardSize()
+				|| Integer.parseInt(positionsArr[0]) <= 0 || Integer.parseInt(positionsArr[1]) <= 0) {
 			System.out.println("Invalid Input");
 		} else {
+			int positionArr0 = Integer.parseInt(positionsArr[0]);
+			int positionArr1 = Integer.parseInt(positionsArr[1]);
 			int posX = positionArr1 - 1;
 			int posY = positionArr0 - 1;
 			startBoard.enterCellPos(posX, posY);

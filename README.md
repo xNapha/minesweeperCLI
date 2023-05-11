@@ -4,9 +4,7 @@
 
 ## Demo & Snippets
 
-<!-- - Include hosted link -->
-
-- Include images of app if CLI or Client App
+![plot](./assets/boardBomb.png)
 
 ---
 
@@ -70,8 +68,8 @@ My goal for this project was to get to as close as a normal minesweeper game as 
 
 ## Known issues
 
-- When entering a single digit co-ordinate (eg 1) instead of the double cor-odrinate (eg .1:2), it will return a out of bounds exception
-- When prompted to restart and a user accepts, scanner close exception occurs
+1. ~~When entering a single digit co-ordinate (eg 1) instead of the double cor-odrinate (eg .1:2), it will return a out of bounds exception~~ (Fixed)
+2. ~~When prompted to restart and a user accepts, scanner close exception occurs~~
 
 ---
 
@@ -84,13 +82,22 @@ My goal for this project was to get to as close as a normal minesweeper game as 
 
 ---
 
-<!-- ## Change logs
+## Change logs
 
---- -->
+### Date 11/05/23:
+
+#1: I was trying to store a variable as an integer without testing to see if it could have been an integer, undefined, or null. Fix was to removing move store it into the variable if it passed the check.
+#2: Scanner .close() method was called at the incorrect time.
+
+---
 
 ## What did you struggle with?
 
-- What? Why? How?
+### Recursion - Cascading Effect
+
+The method cascadeEffect on the Board class, initial was a for loop with an if statement inside. I thought that the if statement inside the for loop would be enough for the method to know when to break, but clearly it wasn't. This then lead me down a rabbit hole of trying to fix tthe if statement inside, believing that was the problem. But then i remembered that recursion is already a loop and that I needed to have a break outside of the for loop not within, the most important rule when it comes to recursion.
+
+What I learnt was that I need to take a step back and look at the problem from a broader perspective when I feel stuck.
 
 ---
 
