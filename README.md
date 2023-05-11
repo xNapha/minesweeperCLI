@@ -87,6 +87,7 @@ My goal for this project was to get to as close as a normal minesweeper game as 
 ### Date 11/05/23:
 
 #1: I was trying to store a variable as an integer without testing to see if it could have been an integer, undefined, or null. Fix was to removing move store it into the variable if it passed the check.
+
 #2: Scanner .close() method was called at the incorrect time.
 
 ---
